@@ -1,0 +1,132 @@
+﻿/* Bessere Darstellung der Bootstrap-Tabs */
+.tab-pane.active {
+    margin-top: 15px;
+}
+
+/* Style für Achsenbeschriftung innerhalb des SVGs */
+.axis {
+  font: 10px sans-serif;
+}
+.axis line {
+  fill: none;
+  stroke: #000;
+}
+
+/* ######################################################################### */
+/* Styles für Kartendarstellung */
+/* ######################################################################### */
+.background {
+  fill: none;
+  pointer-events: all;
+}
+.feature {
+  cursor: pointer;
+  stroke: #aaa;
+  stroke-width: 0.5px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill-opacity: 1;
+}
+path.highlighted {
+  fill: #000;
+}
+/* Kartentooltip */
+div.map_tooltip {
+  display: none;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.8);
+  width: 120px;
+  line-height: 20px;
+  position: absolute;
+  border-radius: 6px;
+  padding: 5px;
+  text-align: center;
+}
+.map_tooltip>span {
+  vertical-align: middle;
+  line-height: 11px;
+  font-size: 11px;
+}
+
+/* ######################################################################### */
+/* Styles für Tabelle der Zulassungsbezirke
+/* ######################################################################### */
+#zb_list {
+  overflow-y: auto;
+}
+
+
+/* ######################################################################### */
+/* Styles für Balkendiagramme
+/* ######################################################################### */
+rect.gsb {
+  fill: #DF8BA0;
+}
+rect.highlighted.gsb {
+  fill: #CD4364;
+}
+
+rect.sb {
+  fill: #A1C7E3;
+}
+rect.highlighted.sb {
+  fill: #68A3D4;
+}
+
+rect.diffn {
+  fill: #428BCA;
+}
+rect.highlighted.diffn {
+  fill: #2D618E;
+}
+
+rect.diffp {
+  fill: #C1133C;
+}
+rect.highlighted.diffp {
+  fill: #880D2A;
+}
+
+rect.je {
+  fill: #93D4C0;
+}
+rect.highlighted.je {
+  fill: #66C2A5;
+}
+/* Hervorheben der Tabellenzellen */
+td.diffp {
+  background-color: #F1D3DC;
+}
+td.diffn {
+  background-color: #DAEBF2;
+}
+.highlighted>td.diffp {
+  background-color: #DF8BA0;
+} 
+.highlighted>td.diffn {
+  background-color: #A1C7E3;
+}
+.highlighted>td {
+  background-color: #e3e3e3;
+}
+
+/* für Anzeige der Gesamtinformationen */
+p.ges-info, p.ges-info-ra {
+  margin-top: 10px;
+}
+p.ges-info-ra {
+  text-align: right;
+}
+
+span.gsb {
+  color: #880D2A;
+  font-weight: bold;
+}
+span.sb {
+  color: #2D618E;
+  font-weight: bold;
+}
+span.je {
+  color: #66C2A5;
+  font-weight: bold;
+}
