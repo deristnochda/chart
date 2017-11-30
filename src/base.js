@@ -5,18 +5,23 @@ class Chart {
     // standard config values
     this.size = {width: 600, height: 400};
     this.margin = {top: 10, right: 10, bottom: 30, left: 30};
+    // make the svg
+    this.svg = where.append("svg");
+    // initialize legend
     this.legend.exists = false;
     this.legend.height = 0;
 
-    // make the svg
-    this.svg = where.append("svg");
     // make the base layer for the chart
     this.baseLayer = this.svg.append("g");
     this.baseLayer.size = {width: this.size.width - this.margin.left - this.margin.right,
                            height: this.size.height - this.margin.top - this.margin.bottom - this.legend.height};
     // bind data to chart
     this.data = data;
+    this.data.forEach(function(d) { d.show = true; return d; });
     this.addAxes();
+    // plot lines
+    this.lines = new Line(this.data, this.baseLayer, this.axes.x.axis, this.axes.y.axis);
+
     this.resize();
   }
 
@@ -48,6 +53,7 @@ class Chart {
     }
     this.axes.x.update(this.baseLayer.size, this.calculateDomain("date"));
     this.axes.y.update(this.baseLayer.size, this.calculateDomain("price"));
+    this.lines.draw(this.data);
   }
 
   legend(bool=true) {
@@ -56,6 +62,7 @@ class Chart {
         this.legend.exists = true;
         this.legend.height = 50;
         this.legendLayer = this.svg.append("g").attr("class", "legend");
+        this.addLegendEntries();
         this.resize();
       }
     } else {
@@ -70,16 +77,56 @@ class Chart {
     return this;
   }
 
+  addLegendEntries() {
+    var color = this.lines.color,
+        lines = this.baseLayer.selectAll(".line"),
+        self = this;
+    // add each legend item
+    var legendItems = this.legendLayer.selectAll(".legend-item")
+      .data(this.data)
+        .enter().append("g")
+          .attr("class", "legend-item")
+          .classed("legend-item-disabled", function(d) { return !d.show; })
+          .on("click", function(d) {
+            var opacity = d3.select(this).classed("legend-item-disabled") ? 1 : 0,
+                legendOpacity = d3.select(this).classed("legend-item-disabled") ? false : true;
+            lines.filter(function(u) {
+              return u.key == d.key;
+            }).style("stroke-opacity", opacity);
+            d3.select(this).classed("legend-item-disabled", legendOpacity)
+            d.show = !legendOpacity;
+            self.resize();
+          })
+    // for each legend item make a rectangle in corresponding color
+    legendItems.append("rect")
+      .attr("width", 18)
+      .attr("height", 18)
+      .style("fill", function(d) { return color(d.key); });
+    // add the legend items description text
+    legendItems.append("text")
+      .attr("x", 22)
+      .attr("y", 14)
+      .text(function(d) { return d.key; });
+    // variable used for right aligning the items
+    var rightEnd = this.size.width - this.margin.left;
+    legendItems.each(function(d) {
+      var item = d3.select(this);
+      rightEnd = rightEnd - item.select("text").node().getBBox().width - 26;
+      item.attr("transform", "translate(" + rightEnd + ", 0)");
+    })
+  }
   /*
     method for calculation the domain of the chart
   */
   calculateDomain(varName) {
-    var minimum = d3.min(this.data, function(d) {
-      return d3.min(d.values, function(v) { return v[varName]; });
-    });
-    var maximum = d3.max(this.data, function(d) {
-      return d3.max(d.values, function(v) { return v[varName]; });
-    })
+    var minimum = d3.min(this.data.filter( function(d) { return d.show==true; }),
+      function(d) {
+        return d3.min(d.values, function(v) { return v[varName]; });
+      });
+    var maximum = d3.max(this.data.filter( function(d) { return d.show==true; }),
+      function(d) {
+        return d3.max(d.values, function(v) { return v[varName]; });
+      });
     return [minimum, maximum];
   }
 
@@ -157,5 +204,30 @@ class Axis {
     // update the domain
     this.axis.domain(domain);
     return this;
+  }
+}
+
+class Line {
+  constructor(data, where, x, y) {
+    this.where = where;
+    this.x = x;
+    this.y = y;
+    this.color = d3.scaleOrdinal(d3.schemeCategory10);
+    this.measure = d3.line()
+        .x(function(d) { return x(d.date); })
+        .y(function(d) { return y(d.price); });
+    this.draw(data);
+  }
+
+  draw(data) {
+    var measure = this.measure,
+        color = this.color;
+    this.lines = this.where.selectAll(".line").data(data);
+    this.lines.enter().append("path")
+      .attr("class", "line")
+      .merge(this.lines)
+        .attr("d", function(d) { return measure(d.values); })
+        .attr("stroke", function(d) { return color(d.key); });
+    this.lines.exit().remove();
   }
 }
